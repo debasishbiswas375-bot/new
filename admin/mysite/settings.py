@@ -45,7 +45,7 @@ MIDDLEWARE = [
 # =========================
 # 3. URLS & WSGI (NAMESPACE FIX)
 # =========================
-# Changed from 'mysite' to match your GitHub folder 'accountingtools'
+# Since your folder is named 'mysite', these must point to 'mysite'
 ROOT_URLCONF = 'mysite.urls'
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
@@ -66,4 +66,46 @@ TEMPLATES = [
 ]
 
 # =========================
-#
+# 4. DATABASE CONFIG (SUPABASE)
+# =========================
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    # Fallback for local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+# =========================
+# 5. STATIC FILES (RENDER)
+# =========================
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# =========================
+# 6. RENDER SECURITY SETTINGS
+# =========================
+# These must be at the bottom to ensure DEBUG is already defined
+if not DEBUG:
+    # Fixes the Login Refresh loop on Render
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
