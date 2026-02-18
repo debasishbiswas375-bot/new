@@ -46,8 +46,8 @@ MIDDLEWARE = [
 # 3. URLS & WSGI (NAMESPACE FIX)
 # =========================
 # Changed from 'mysite' to match your GitHub folder 'accountingtools'
-ROOT_URLCONF = 'accountingtools.urls'
-WSGI_APPLICATION = 'accountingtools.wsgi.application'
+ROOT_URLCONF = 'mysite.urls'
+WSGI_APPLICATION = 'mysite.wsgi.application'
 
 TEMPLATES = [
     {
