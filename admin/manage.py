@@ -1,19 +1,18 @@
-#!/usr/bin/env python
-import os
-import sys
 import threading
 import time
 import requests
+import os
+import sys
 
-def keep_alive():
-    # Pings both to keep them from sleeping
-    urls = [
-        "https://accountingexpert.onrender.com/admin/", 
-        "https://tally-tools.streamlit.app/"
+def keep_alive_loop():
+    # Pings both sites every 14 minutes to reset Render's 15-minute sleep timer
+    targets = [
+        "https://accountingexpert.onrender.com/admin/",
+        "https://newtool.streamlit.app/"
     ]
-    time.sleep(30)
+    time.sleep(20) # Wait for startup
     while True:
-        for url in urls:
+        for url in targets:
             try:
                 requests.get(url, timeout=10)
             except:
@@ -23,8 +22,8 @@ def keep_alive():
 def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
     
-    # Start the pinger thread
-    threading.Thread(target=keep_alive, daemon=True).start()
+    # Start the pinger background thread
+    threading.Thread(target=keep_alive_loop, daemon=True).start()
 
     try:
         from django.core.management import execute_from_command_line
