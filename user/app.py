@@ -15,7 +15,7 @@ def navigate_to(page):
 # 3. DYNAMIC MAPPING
 def load_page(name):
     try:
-        # Adjusted to target the 'pages' package correctly
+        # Targets files inside the 'pages' directory
         return importlib.import_module(f"pages.{name}")
     except ImportError:
         return None
@@ -38,7 +38,7 @@ st.markdown("""
 with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Path safety for logo
+    # Path safety for logo to prevent MediaFileStorageError
     logo_path = "user/logo.png" if os.path.exists("user/logo.png") else "logo.png"
     if os.path.exists(logo_path):
         st.image(logo_path, use_container_width=True)
@@ -47,10 +47,11 @@ with st.sidebar:
         
     st.markdown('<div class="menu-label">Main Menu</div>', unsafe_allow_html=True)
     
+    # --- THESE ARE THE BUTTONS YOU ASKED FOR ---
     if st.button("📈 Dashboard"): navigate_to("Dashboard")
     if st.button("📂 Converter"): navigate_to("Converter")
     if st.button("👤 My Profile"): navigate_to("Profile")
-    if st.button("🔐 Login / Register"): navigate_to("Auth")
+    if st.button("🔐 Access Portal"): navigate_to("Auth")
     
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("📦 Packages", type="primary"): navigate_to("Packages")
@@ -60,7 +61,8 @@ current_page = st.session_state.current_page
 page_mod = load_page(current_page)
 
 if page_mod and hasattr(page_mod, 'app'):
+    # Calls the app() function within the selected page file
     page_mod.app()
 else:
     st.title(current_page)
-    st.error(f"{current_page}.py not found or missing app() function.")
+    st.error(f"{current_page}.py not found in pages folder or is missing 'def app():'")
