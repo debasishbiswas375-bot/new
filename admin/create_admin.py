@@ -1,13 +1,20 @@
 import os
 import django
-from django.contrib.auth import get_user_model
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'accountingtools.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 django.setup()
 
-User = get_user_model()
-if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'deba@example.com', 'admin123')
-    print("Superuser created successfully.")
+from django.contrib.auth.models import User
+
+username = 'deba'
+email = 'admin@example.com'
+password = 'Deba@9002'
+
+if not User.objects.filter(username=username).exists():
+    User.objects.create_superuser(username, email, password)
+    print(f"Superuser {username} created successfully!")
 else:
-    print("Superuser already exists.")
+    user = User.objects.get(username=username)
+    user.set_password(password)
+    user.save()
+    print(f"Password for {username} has been updated!")
