@@ -16,9 +16,11 @@ SECRET_KEY = os.environ.get(
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
-# Add this near your ALLOWED_HOSTS
-CSRF_TRUSTED_ORIGINS = ['https://accountingexpert.onrender.com']
-
+# Add this near ALLOWED_HOSTS
+CSRF_TRUSTED_ORIGINS = [
+    'https://accountingexpert.onrender.com',
+    'https://newtool.streamlit.app'
+]
 # =========================
 # 2. APPLICATION DEFINITION
 # =========================
