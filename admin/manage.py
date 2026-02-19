@@ -9,7 +9,7 @@ import requests
 def keep_alive():
     # Replace with your actual URLs
     RENDER_URL = "https://accountingexpert.onrender.com/admin/"
-    STREAMLIT_URL = "https://tally-tools.streamlit.app"
+    STREAMLIT_URL = "https://newtool.streamlit.app/"
     
     time.sleep(20) # Wait for server to boot
     while True:
