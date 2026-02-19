@@ -3,7 +3,7 @@ import importlib
 import os
 
 # 1. PAGE CONFIGURATION
-st.set_page_config(page_title="Accounting Expert", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Accounting Expert", page_icon="logo.png", layout="wide")
 
 # 2. DYNAMIC MAPPING
 def load_page(name):
