@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.urls import path
+from django.shortcuts import redirect #
 from django.contrib.auth.models import User
-from django.shortcuts import redirect
 
-# Admin auto-creation logic
+# Keep your auto-admin trick
 def auto_create_admin():
     try:
         if not User.objects.filter(username="admin").exists():
@@ -13,16 +13,11 @@ def auto_create_admin():
 
 auto_create_admin()
 
-# Redirect function
-def redirect_to_streamlit(request):
-    # Change this URL if your Streamlit link has changed!
-    return redirect("https://tally-tools.streamlit.app/")
-
-admin.site.site_header = "Accounting Expert Admin Portal"
-admin.site.site_title = "Accounting Expert Admin Portal"
-admin.site.index_title = "Welcome to the Admin Portal"
+# Function to handle the jump to Streamlit
+def jump_to_streamlit(request):
+    return redirect("https://newtool.streamlit.app/")
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Your working admin portal
-    path('', redirect_to_streamlit),  # Redirects the 'Not Found' root to Streamlit
+    path('admin/', admin.site.urls), # Keep this so you can still use your admin panel
+    path('', jump_to_streamlit),     # This sends the home page to Streamlit
 ]
