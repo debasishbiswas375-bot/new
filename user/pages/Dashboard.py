@@ -1,21 +1,19 @@
 import streamlit as st
 
 def app():
-    st.title("📊 Accounting Expert Dashboard")
+    st.title("📚 Learning Hub")
     
-    # Overview Metrics
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Points Balance", st.session_state.get("credits", 0))
-    col2.metric("Files Converted", "0")
-    col3.metric("Current Plan", "Standard Free")
-
-    st.markdown("---")
-    st.subheader("Quick Start Topics")
     topics = {
         "Accounting Basics": "Introduction to the double-entry system.",
+        "Debits and Credits": "The foundation of every transaction.",
+        "Accounting Equation": "Assets = Liabilities + Equity",
         "Tally Prime Setup": "How to create your first company in Tally."
     }
 
+    search = st.text_input("Search for a topic...", placeholder="e.g. Debits")
+
     for topic, desc in topics.items():
-        with st.expander(f"📙 {topic}"):
-            st.write(desc)
+        if search.lower() in topic.lower():
+            with st.expander(f"📙 {topic}"):
+                st.write(desc)
+                st.button(f"Read Full Lesson: {topic}", key=topic)
