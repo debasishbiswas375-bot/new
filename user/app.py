@@ -41,7 +41,7 @@ st.markdown("""
 # 5. SIDEBAR MENU
 with st.sidebar:
     st.markdown("<br>", unsafe_allow_html=True)
-    st.image("logo.png", use_container_width=True)
+    st.image("user/logo.png", use_container_width=True)
     st.markdown('<div class="menu-label">Main Menu</div>', unsafe_allow_html=True)
     
     if st.button("📊  Dashboard"): navigate_to("Dashboard")
