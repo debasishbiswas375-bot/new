@@ -6,3 +6,4 @@ whitenoise
 django-jazzmin
 pandas
 openpyxl
+requests
