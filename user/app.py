@@ -2,51 +2,44 @@ import streamlit as st
 import importlib
 import os
 
-# 1. PAGE CONFIGURATION
-st.set_page_config(page_title="Accounting Expert", page_icon="logo.png", layout="wide")
+st.set_page_config(page_title="Accounting Expert", page_icon="📈", layout="wide")
 
-# 2. DYNAMIC MAPPING
+# FIX: Dynamic mapping adjusted for subdirectory structure
 def load_page(name):
     try:
-        # Adjusted for the /user/pages directory structure
+        # Streamlit on Cloud often needs the full path from the repo root
         return importlib.import_module(f"pages.{name}")
     except ImportError:
-        return None
+        try:
+            return importlib.import_module(f"user.pages.{name}")
+        except ImportError:
+            return None
 
-dashboard_mod = load_page("Dashboard")
-converter_mod = load_page("Converter")
-profile_mod = load_page("Profile")
-auth_mod = load_page("Auth")
-
-# 3. NAVIGATION STATE
+# NAVIGATION STATE
 if 'current_page' not in st.session_state:
     st.session_state.current_page = "Dashboard"
 
 def navigate_to(page):
     st.session_state.current_page = page
 
-# 4. SIDEBAR MENU (FIXED LOGO PATH)
+# SIDEBAR (FIXED LOGO AND PATHS)
 with st.sidebar:
-    st.markdown("<br>", unsafe_allow_html=True)
-    
-    # Path is relative to the repository root
     logo_path = "user/logo.png"
     if os.path.exists(logo_path):
         st.image(logo_path, use_container_width=True)
     else:
-        st.warning("Logo missing at user/logo.png")
-        
-    st.markdown('<div class="menu-label">Main Menu</div>', unsafe_allow_html=True)
+        st.warning("Logo missing")
     
-    if st.button("📈 Dashboard"): navigate_to("Dashboard")
+    if st.button("📊 Dashboard"): navigate_to("Dashboard")
     if st.button("📂 Converter"): navigate_to("Converter")
     if st.button("👤 My Profile"): navigate_to("Profile")
-    if st.button("🔐 Login / Register"): navigate_to("Login")
+    if st.button("🔐 Access Portal"): navigate_to("Auth")
 
-# 5. CONTENT ROUTING
+# CONTENT ROUTING
 page = st.session_state.current_page
-if page == "Dashboard" and dashboard_mod:
-    dashboard_mod.app()
-elif page == "Converter" and converter_mod:
-    converter_mod.app()
-# ... (add other routing here)
+mod = load_page(page)
+
+if mod and hasattr(mod, 'app'):
+    mod.app()
+else:
+    st.error(f"{page}.py file not found in pages directory.")
