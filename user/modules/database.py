@@ -3,7 +3,7 @@ import streamlit as st
 from supabase import create_client, Client
 
 # Your Supabase Credentials from the screenshot
-SUPABASE_URL = "https://aombczanizdhiulwkuhf.supabase.co"
+SUPABASE_URL = "https://drktezrfydyzychmthlp.supabase.co"
 # Replace with your actual project 'anon' or 'service_role' key found in Supabase Settings
 SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "Deba9002043666") 
 
