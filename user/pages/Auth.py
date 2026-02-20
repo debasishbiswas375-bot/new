@@ -1,76 +1,94 @@
 import streamlit as st
 import psycopg2
+import hashlib
 
-def app():
-    st.title("🔐 Access Portal")
-    
-    # Matching the tabs in your logic
-    tab1, tab2 = st.tabs(["Sign In", "Full Business Registration"])
+st.set_page_config(page_title="Access Portal")
 
-    with tab1:
-        st.subheader("Login to your Account")
-        with st.form("login_form"):
-            login_user = st.text_input("Username")
-            login_pw = st.text_input("Password", type="password")
-            submit_login = st.form_submit_button("Sign In")
+st.title("🔐 Access Portal")
 
-            if submit_login:
-                try:
-                    # Connection string from st.secrets
-                    conn = psycopg2.connect(st.secrets["DATABASE_URL"])
-                    cur = conn.cursor()
-                    
-                    # Checking the auth_user table
-                    cur.execute("SELECT id FROM auth_user WHERE username = %s AND password = %s", (login_user, login_pw))
-                    user = cur.fetchone()
-                    
-                    if user:
-                        st.success(f"Welcome back, {login_user}!")
-                        st.session_state['logged_in'] = True
-                        st.session_state['username'] = login_user
-                    else:
-                        st.error("Invalid username or password.")
-                    
-                    conn.close()
-                except Exception as ex:
-                    st.error(f"Database connection failed: {ex}")
+tab1, tab2 = st.tabs(["Sign In", "Full Business Registration"])
 
-    with tab2:
-        st.subheader("Register Business")
-        with st.form("reg_form"):
-            u = st.text_input("Username*")
-            e = st.text_input("Email")
-            p = st.text_input("Password*", type="password")
-            
-            if st.form_submit_button("Register & Sync"):
-                if not u or not p:
-                    st.warning("Please fill in required fields (*)")
-                else:
-                    try:
-                        conn = psycopg2.connect(st.secrets["DATABASE_URL"])
-                        cur = conn.cursor()
-                        
-                        # Insert into auth_user
-                        cur.execute(
-                            "INSERT INTO auth_user (username, password, email, is_active, date_joined) "
-                            "VALUES (%s, %s, %s, True, NOW()) RETURNING id", 
-                            (u, p, e)
-                        )
-                        uid = cur.fetchone()[0]
-                        
-                        # Insert into profiles
-                        cur.execute(
-                            "INSERT INTO profiles (user_id_id, username, email, points) "
-                            "VALUES (%s, %s, %s, 100)", 
-                            (uid, u, e)
-                        )
-                        
-                        conn.commit()
-                        st.success(f"Success! {u} registered.")
-                        conn.close()
-                    except Exception as ex:
-                        st.error(f"Sync failed: {ex}")
 
-# This line is CRITICAL for the router to find the page
-if __name__ == "__main__":
-    app()
+# ------------------------
+# SIGN IN
+# ------------------------
+with tab1:
+    st.subheader("Login")
+
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    if st.button("Login"):
+        try:
+            conn = psycopg2.connect(st.secrets["DATABASE_URL"])
+            cur = conn.cursor()
+
+            # Hash password (basic example)
+            hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+            cur.execute(
+                "SELECT * FROM auth_user WHERE username=%s AND password=%s",
+                (username, hashed_password),
+            )
+
+            user = cur.fetchone()
+
+            if user:
+                st.success("Login successful!")
+            else:
+                st.error("Invalid credentials")
+
+            conn.close()
+
+        except Exception as e:
+            st.error(f"Database error: {e}")
+
+
+# ------------------------
+# REGISTRATION
+# ------------------------
+with tab2:
+    st.subheader("Register Business")
+
+    with st.form("reg_form"):
+        u = st.text_input("Username*")
+        e = st.text_input("Email")
+        p = st.text_input("Password*", type="password")
+
+        submitted = st.form_submit_button("Register & Sync")
+
+        if submitted:
+            try:
+                conn = psycopg2.connect(st.secrets["DATABASE_URL"])
+                cur = conn.cursor()
+
+                hashed_password = hashlib.sha256(p.encode()).hexdigest()
+
+                cur.execute(
+                    """
+                    INSERT INTO auth_user 
+                    (username, password, email, is_active, date_joined)
+                    VALUES (%s, %s, %s, True, NOW()) 
+                    RETURNING id
+                    """,
+                    (u, hashed_password, e),
+                )
+
+                uid = cur.fetchone()[0]
+
+                cur.execute(
+                    """
+                    INSERT INTO profiles 
+                    (user_id_id, username, email, points)
+                    VALUES (%s, %s, %s, 100)
+                    """,
+                    (uid, u, e),
+                )
+
+                conn.commit()
+                conn.close()
+
+                st.success(f"Success! {u} registered.")
+
+            except Exception as ex:
+                st.error(f"Registration failed: {ex}")
