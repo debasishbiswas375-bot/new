@@ -5,7 +5,7 @@ import psycopg2
 def app():
     st.title("🔐 Access Portal")
     
-    # Define the tabs for user interaction
+    # Create the tabs
     tab1, tab2 = st.tabs(["Sign In", "Full Business Registration"])
 
     # --- TAB 1: SIGN IN ---
@@ -18,9 +18,11 @@ def app():
 
             if submit_login:
                 try:
+                    # Connect using the secret URL (ensure you removed the [] brackets in Secrets!)
                     conn = psycopg2.connect(st.secrets["DATABASE_URL"])
                     cur = conn.cursor()
-                    # Simple check: Adjust query based on your encryption (e.g., MD5/Bcrypt)
+                    
+                    # Query to match your auth_user table
                     cur.execute("SELECT id FROM auth_user WHERE username = %s AND password = %s", (login_user, login_pw))
                     user = cur.fetchone()
                     
@@ -67,11 +69,11 @@ def app():
                         )
                         
                         conn.commit()
-                        st.success(f"Success! {u} registered and synced.")
+                        st.success(f"Success! {u} registered.")
                         conn.close()
                     except Exception as ex:
                         st.error(f"Sync failed: {ex}")
 
-# Essential for multi-page routing
+# This tells Streamlit to run the app function when the page is selected
 if __name__ == "__main__":
     app()
