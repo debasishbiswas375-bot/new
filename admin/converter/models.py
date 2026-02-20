@@ -5,7 +5,7 @@ from datetime import timedelta
 
 
 # ===============================
-# PLAN (Template Only)
+# PLAN (Template)
 # ===============================
 class Plan(models.Model):
     name = models.CharField(max_length=100)
