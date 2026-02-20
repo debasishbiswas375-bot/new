@@ -1,14 +1,39 @@
 import streamlit as st
+import requests
+
+
+API_URL = "https://accountingexpert.onrender.com/plans/"
+
 
 def app():
     st.title("📦 Point Packages")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.info("### Basic\n50 Points/1 Months\n₹99")
-        st.button("Buy Basic")
-    with col2:
-        st.success("### Pro\n500 Points/3 Months\n₹599")
-        st.button("Buy Pro", type="primary")
-    with col3:
-        st.info("### Enterprise\nUnlimited\n₹1999")
-        st.button("Contact Us")
+
+    try:
+        response = requests.get(API_URL)
+        data = response.json()
+        plans = data.get("plans", [])
+
+        if not plans:
+            st.warning("No plans available.")
+            return
+
+        cols = st.columns(3)
+
+        for index, plan in enumerate(plans):
+            with cols[index % 3]:
+
+                st.markdown(f"""
+                ### {plan['name']}
+                
+                **{plan['credit_limit']} Points**  
+                Duration: {plan['duration_months']} Month(s)  
+                
+                ₹{plan['price']}
+                """)
+
+                if st.button(f"Buy {plan['name']}", key=plan['id']):
+                    st.success(f"You selected {plan['name']}")
+
+    except Exception as e:
+        st.error("Failed to load plans.")
+        st.write(str(e))
