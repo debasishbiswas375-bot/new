@@ -1,12 +1,69 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password, check_password
+from django.views.decorators.csrf import csrf_exempt
+import json
+
 
 def home(request):
-    if request.method == 'POST' and request.FILES.get('file'):
-        uploaded_file = request.FILES['file']
-        
-        # We will add the "Real Conversion Logic" here in the next step.
-        # For now, let's just prove it works!
-        return HttpResponse(f"✅ Received file: {uploaded_file.name}")
+    return HttpResponse("Django Backend Running ✅")
 
-    return render(request, 'home.html')
+
+# =========================
+# REGISTER API
+# =========================
+@csrf_exempt
+def register_user(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            username = data.get("username")
+            email = data.get("email")
+            password = data.get("password")
+
+            if not username or not password:
+                return JsonResponse({"error": "Username and password required"}, status=400)
+
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({"error": "Username already exists"}, status=400)
+
+            user = User.objects.create(
+                username=username,
+                email=email,
+                password=make_password(password),
+                is_active=True
+            )
+
+            return JsonResponse({"message": "User created successfully"}, status=201)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+# =========================
+# LOGIN API
+# =========================
+@csrf_exempt
+def login_user(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            username = data.get("username")
+            password = data.get("password")
+
+            user = User.objects.filter(username=username).first()
+
+            if user and check_password(password, user.password):
+                return JsonResponse({"message": "Login successful"}, status=200)
+
+            return JsonResponse({"error": "Invalid credentials"}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
