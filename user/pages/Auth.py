@@ -1,79 +1,86 @@
 import streamlit as st
 import requests
 
-# 🔥 CHANGE THIS TO YOUR RENDER URL
-DJANGO_BASE_URL = "https://accountingexpert.onrender.com"
+DJANGO_URL = "https://accountingexpert.onrender.com"
 
-REGISTER_URL = f"{DJANGO_BASE_URL}/api/register/"
-LOGIN_URL = f"{DJANGO_BASE_URL}/api/login/"
-
-
-def register_user(username, email, password):
-    payload = {
-        "username": username,
-        "email": email,
-        "password": password
-    }
-
-    response = requests.post(REGISTER_URL, json=payload)
-
-    if response.status_code == 201:
-        return True, "Registration successful"
-    else:
-        return False, response.json().get("error", "Registration failed")
-
-
-def login_user(username, password):
-    payload = {
-        "username": username,
-        "password": password
-    }
-
-    response = requests.post(LOGIN_URL, json=payload)
-
-    if response.status_code == 200:
-        return True, "Login successful"
-    else:
-        return False, response.json().get("error", "Invalid credentials")
+REGISTER_URL = f"{DJANGO_URL}/api/register/"
+LOGIN_URL = f"{DJANGO_URL}/api/login/"
+USER_INFO_URL = f"{DJANGO_URL}/api/user-info/"
+CONVERT_URL = f"{DJANGO_URL}/api/convert/"
 
 
 def app():
     st.title("🔐 Access Portal")
-    tab1, tab2 = st.tabs(["Sign In", "Full Business Registration"])
+
+    tab1, tab2 = st.tabs(["Login", "Register"])
 
     # LOGIN
     with tab1:
-        st.subheader("Login")
-
-        username = st.text_input("Username", key="login_user")
-        password = st.text_input("Password", type="password", key="login_pass")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
 
         if st.button("Login"):
-            success, message = login_user(username, password)
+            res = requests.post(LOGIN_URL, json={
+                "username": username,
+                "password": password
+            })
 
-            if success:
-                st.success(message)
+            if res.status_code == 200:
                 st.session_state.logged_in = True
                 st.session_state.username = username
+                st.success("Login successful")
             else:
-                st.error(message)
+                st.error("Invalid credentials")
 
     # REGISTER
     with tab2:
-        st.subheader("Register Business")
+        new_u = st.text_input("New Username")
+        email = st.text_input("Email")
+        new_p = st.text_input("New Password", type="password")
 
-        with st.form("registration_form"):
-            new_u = st.text_input("Username*")
-            email = st.text_input("Email")
-            new_p = st.text_input("Password*", type="password")
+        if st.button("Register"):
+            res = requests.post(REGISTER_URL, json={
+                "username": new_u,
+                "password": new_p,
+                "email": email
+            })
 
-            if st.form_submit_button("Register & Sync"):
-                success, message = register_user(new_u, email, new_p)
+            if res.status_code == 201:
+                st.success("Registered successfully")
+            else:
+                st.error(res.json().get("error"))
 
-                if success:
-                    st.success(message)
-                else:
-                    st.error(message)
+
+# ===============================
+# DASHBOARD SECTION
+# ===============================
+if "logged_in" in st.session_state and st.session_state.logged_in:
+
+    st.sidebar.title("Menu")
+    menu = st.sidebar.selectbox("Choose", ["Dashboard", "Converter", "Plans"])
+
+    username = st.session_state.username
+
+    if menu == "Dashboard":
+        res = requests.get(USER_INFO_URL, params={"username": username})
+        data = res.json()
+
+        st.header("Dashboard")
+        st.metric("Current Plan", data["plan"])
+        st.metric("Credits", data["credits"])
+        st.metric("Files Converted", data["files_converted"])
+
+    elif menu == "Converter":
+        st.header("Convert File")
+        if st.button("Convert Dummy File"):
+            res = requests.post(CONVERT_URL, data={"username": username})
+            st.success(res.json().get("message", res.json().get("error")))
+
+    elif menu == "Plans":
+        st.header("Available Plans")
+        st.write("Basic – 50 credits")
+        st.write("Pro – 200 credits")
+        st.write("Enterprise – Custom")
 
 
 if __name__ == "__main__":
