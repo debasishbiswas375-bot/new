@@ -1,14 +1,12 @@
 import streamlit as st
-import hashlib
 import psycopg2
 
 def app():
     st.title("🔐 Access Portal")
     
-    # Create the tabs
+    # Matching the tabs in your logic
     tab1, tab2 = st.tabs(["Sign In", "Full Business Registration"])
 
-    # --- TAB 1: SIGN IN ---
     with tab1:
         st.subheader("Login to your Account")
         with st.form("login_form"):
@@ -18,11 +16,11 @@ def app():
 
             if submit_login:
                 try:
-                    # Connect using the secret URL (ensure you removed the [] brackets in Secrets!)
+                    # Connection string from st.secrets
                     conn = psycopg2.connect(st.secrets["DATABASE_URL"])
                     cur = conn.cursor()
                     
-                    # Query to match your auth_user table
+                    # Checking the auth_user table
                     cur.execute("SELECT id FROM auth_user WHERE username = %s AND password = %s", (login_user, login_pw))
                     user = cur.fetchone()
                     
@@ -35,9 +33,8 @@ def app():
                     
                     conn.close()
                 except Exception as ex:
-                    st.error(f"Login failed: {ex}")
+                    st.error(f"Database connection failed: {ex}")
 
-    # --- TAB 2: REGISTRATION ---
     with tab2:
         st.subheader("Register Business")
         with st.form("reg_form"):
@@ -53,7 +50,7 @@ def app():
                         conn = psycopg2.connect(st.secrets["DATABASE_URL"])
                         cur = conn.cursor()
                         
-                        # 1. Insert into auth_user
+                        # Insert into auth_user
                         cur.execute(
                             "INSERT INTO auth_user (username, password, email, is_active, date_joined) "
                             "VALUES (%s, %s, %s, True, NOW()) RETURNING id", 
@@ -61,7 +58,7 @@ def app():
                         )
                         uid = cur.fetchone()[0]
                         
-                        # 2. Insert into profiles using the returned ID
+                        # Insert into profiles
                         cur.execute(
                             "INSERT INTO profiles (user_id_id, username, email, points) "
                             "VALUES (%s, %s, %s, 100)", 
@@ -74,6 +71,6 @@ def app():
                     except Exception as ex:
                         st.error(f"Sync failed: {ex}")
 
-# This tells Streamlit to run the app function when the page is selected
+# This line is CRITICAL for the router to find the page
 if __name__ == "__main__":
     app()
