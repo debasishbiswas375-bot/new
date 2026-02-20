@@ -4,8 +4,28 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
+from datetime import timedelta
 
 from .models import UserProfile, Plan
+
+
+# ======================================================
+# GET ALL PLANS (NEW API)
+# ======================================================
+def get_plans(request):
+    plans = Plan.objects.all()
+
+    data = []
+    for plan in plans:
+        data.append({
+            "id": plan.id,
+            "name": plan.name,
+            "price": float(plan.price),
+            "duration_months": plan.duration_months,
+            "credit_limit": plan.credit_limit,
+        })
+
+    return JsonResponse({"plans": data})
 
 
 # ======================================================
@@ -27,28 +47,22 @@ def register_user(request):
             if User.objects.filter(username=username).exists():
                 return JsonResponse({"error": "Username already exists"}, status=400)
 
-            # Create Django user
             user = User.objects.create_user(
                 username=username,
                 email=email,
                 password=password
             )
 
-            # Get signup free plan
-            try:
-                plan = Plan.objects.get(name="signup free")
-            except Plan.DoesNotExist:
-                return JsonResponse({"error": "Signup plan not found"}, status=500)
+            # assign first plan automatically (or signup free if exists)
+            plan = Plan.objects.first()
 
-            # Create profile + activate plan
             profile = UserProfile.objects.create(user=user)
-            profile.activate_plan(plan)
+            if plan:
+                profile.activate_plan(plan)
 
             return JsonResponse({
                 "success": True,
-                "plan": plan.name,
-                "credits": plan.credits,
-                "expires_on": profile.subscription_end
+                "plan": plan.name if plan else None
             }, status=201)
 
         except Exception as e:
@@ -76,16 +90,15 @@ def login_user(request):
 
             profile = UserProfile.objects.get(user=user)
 
-            # Check expiry
-            if not profile.is_active():
+            if profile.expiry_date and profile.expiry_date < timezone.now().date():
                 return JsonResponse({"error": "Subscription expired"}, status=403)
 
             return JsonResponse({
                 "success": True,
                 "username": username,
                 "plan": profile.plan.name if profile.plan else None,
-                "credits_remaining": profile.credits_remaining,
-                "expires_on": profile.subscription_end
+                "credits_remaining": profile.user_credits,
+                "expiry_date": profile.expiry_date
             })
 
         except Exception as e:
