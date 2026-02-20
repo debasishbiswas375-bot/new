@@ -1,12 +1,17 @@
 from django.contrib import admin
-from .models import Plan, Profile
+from .models import Plan, UserProfile
+
 
 @admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'monthly_limit')
+    list_display = ("name", "default_credits")
 
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('email', 'username', 'plan')
-    list_filter = ('plan',)
-    search_fields = ('email', 'username')
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "plan",
+        "credits",
+        "files_converted"
+    )
