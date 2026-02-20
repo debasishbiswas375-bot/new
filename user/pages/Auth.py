@@ -1,62 +1,80 @@
 import streamlit as st
-import psycopg2
-import hashlib
+import requests
 
-def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+# 🔥 CHANGE THIS TO YOUR RENDER URL
+DJANGO_BASE_URL = "https://accountingexpert.onrender.com"
+
+REGISTER_URL = f"{DJANGO_BASE_URL}/api/register/"
+LOGIN_URL = f"{DJANGO_BASE_URL}/api/login/"
+
+
+def register_user(username, email, password):
+    payload = {
+        "username": username,
+        "email": email,
+        "password": password
+    }
+
+    response = requests.post(REGISTER_URL, json=payload)
+
+    if response.status_code == 201:
+        return True, "Registration successful"
+    else:
+        return False, response.json().get("error", "Registration failed")
+
+
+def login_user(username, password):
+    payload = {
+        "username": username,
+        "password": password
+    }
+
+    response = requests.post(LOGIN_URL, json=payload)
+
+    if response.status_code == 200:
+        return True, "Login successful"
+    else:
+        return False, response.json().get("error", "Invalid credentials")
+
 
 def app():
     st.title("🔐 Access Portal")
     tab1, tab2 = st.tabs(["Sign In", "Full Business Registration"])
 
-    # LOGIN SECTION
+    # LOGIN
     with tab1:
         st.subheader("Login")
+
         username = st.text_input("Username", key="login_user")
         password = st.text_input("Password", type="password", key="login_pass")
 
         if st.button("Login"):
-            try:
-                conn = psycopg2.connect(st.secrets["DATABASE_URL"])
-                cur = conn.cursor()
-                hashed = hash_password(password)
-                
-                cur.execute("SELECT id FROM auth_user WHERE username = %s AND password = %s", (username, hashed))
-                user = cur.fetchone()
+            success, message = login_user(username, password)
 
-                if user:
-                    st.success("✅ Login successful!")
-                    st.session_state.logged_in = True
-                    st.session_state.username = username
-                else:
-                    st.error("❌ Invalid username or password")
-                conn.close()
-            except Exception as e:
-                st.error(f"Database error: {e}")
+            if success:
+                st.success(message)
+                st.session_state.logged_in = True
+                st.session_state.username = username
+            else:
+                st.error(message)
 
-    # REGISTRATION SECTION
+    # REGISTER
     with tab2:
         st.subheader("Register Business")
+
         with st.form("registration_form"):
-            new_u = st.text_input("Username*", key="reg_user")
-            email = st.text_input("Email", key="reg_email")
-            new_p = st.text_input("Password*", type="password", key="reg_pass")
+            new_u = st.text_input("Username*")
+            email = st.text_input("Email")
+            new_p = st.text_input("Password*", type="password")
+
             if st.form_submit_button("Register & Sync"):
-                try:
-                    conn = psycopg2.connect(st.secrets["DATABASE_URL"])
-                    cur = conn.cursor()
-                    hashed = hash_password(new_p)
+                success, message = register_user(new_u, email, new_p)
 
-                    cur.execute("INSERT INTO auth_user (username, password, email, is_active, date_joined) VALUES (%s, %s, %s, TRUE, NOW()) RETURNING id", (new_u, hashed, email))
-                    user_id = cur.fetchone()[0]
+                if success:
+                    st.success(message)
+                else:
+                    st.error(message)
 
-                    cur.execute("INSERT INTO profiles (user_id_id, username, email, points) VALUES (%s, %s, %s, 100)", (user_id, new_u, email))
-                    
-                    conn.commit()
-                    conn.close()
-                    st.success(f"🎉 {new_u} registered successfully!")
-                except Exception as ex:
-                    st.error(f"Registration failed: {ex}")
 
 if __name__ == "__main__":
     app()
