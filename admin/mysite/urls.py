@@ -1,5 +1,7 @@
 import os
-print("FOLDERS:", os.listdir())from django.contrib import admin
+print("FOLDERS:", os.listdir())
+
+from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
