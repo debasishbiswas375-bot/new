@@ -2,10 +2,10 @@ from django.contrib import admin
 from django.urls import path
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
-from .views import register_user, login_user
+from core.views import register_user, login_user, home  # CHANGE core if needed
 
 
-# Auto-create admin
+# Auto-create admin user
 def auto_create_admin():
     try:
         if not User.objects.filter(username="admin").exists():
@@ -16,6 +16,7 @@ def auto_create_admin():
             )
     except Exception:
         pass
+
 
 auto_create_admin()
 
@@ -28,5 +29,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/register/', register_user),
     path('api/login/', login_user),
-    path('', jump_to_streamlit),
+    path('', home),  # backend check
 ]
