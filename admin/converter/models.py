@@ -1,26 +1,20 @@
 from django.db import models
+from django.contrib.auth.models import User
+
 
 class Plan(models.Model):
-    name = models.CharField(max_length=100) # e.g., Free, Pro, Gold
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    monthly_limit = models.IntegerField(default=5) # Conversions allowed
-
-    class Meta:
-        db_table = 'plans'
-        managed = False 
+    name = models.CharField(max_length=50, unique=True)
+    default_credits = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
 
-class Profile(models.Model):
-    id = models.UUIDField(primary_key=True) # Matches Supabase Auth UUID
-    email = models.EmailField()
-    username = models.CharField(max_length=255, null=True, blank=True)
-    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, blank=True)
 
-    class Meta:
-        db_table = 'profiles'
-        managed = False
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True)
+    credits = models.IntegerField(default=0)
+    files_converted = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.email
+        return self.user.username
