@@ -4,18 +4,19 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.utils import timezone
-from datetime import timedelta
+from django.core.mail import send_mail
+from django.conf import settings
 
 from .models import UserProfile, Plan
 
 
 # ======================================================
-# GET ALL PLANS (NEW API)
+# GET PLANS
 # ======================================================
 def get_plans(request):
     plans = Plan.objects.all()
-
     data = []
+
     for plan in plans:
         data.append({
             "id": plan.id,
@@ -29,7 +30,7 @@ def get_plans(request):
 
 
 # ======================================================
-# REGISTER USER
+# REGISTER USER WITH OTP
 # ======================================================
 @csrf_exempt
 def register_user(request):
@@ -41,8 +42,13 @@ def register_user(request):
             email = data.get("email")
             password = data.get("password")
 
-            if not username or not password:
-                return JsonResponse({"error": "Missing fields"}, status=400)
+            full_name = data.get("full_name")
+            company = data.get("company")
+            phone = data.get("phone")
+            address = data.get("address")
+            pin_code = data.get("pin_code")
+            district = data.get("district")
+            state = data.get("state")
 
             if User.objects.filter(username=username).exists():
                 return JsonResponse({"error": "Username already exists"}, status=400)
@@ -53,22 +59,58 @@ def register_user(request):
                 password=password
             )
 
-            # assign first plan automatically (or signup free if exists)
-            plan = Plan.objects.first()
+            profile = UserProfile.objects.create(
+                user=user,
+                full_name=full_name,
+                company=company,
+                phone=phone,
+                address=address,
+                pin_code=pin_code,
+                district=district,
+                state=state,
+            )
 
-            profile = UserProfile.objects.create(user=user)
-            if plan:
-                profile.activate_plan(plan)
+            profile.generate_otp()
 
-            return JsonResponse({
-                "success": True,
-                "plan": plan.name if plan else None
-            }, status=201)
+            send_mail(
+                "Verify Your Email - Accounting Expert",
+                f"Your OTP is {profile.email_otp}",
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
+
+            return JsonResponse({"message": "User created. Check email for OTP."}, status=201)
 
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+# ======================================================
+# VERIFY EMAIL OTP
+# ======================================================
+@csrf_exempt
+def verify_email(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        otp = data.get("otp")
+
+        try:
+            profile = UserProfile.objects.get(user__username=username)
+
+            if profile.email_otp == otp:
+                profile.email_verified = True
+                profile.email_otp = None
+                profile.save()
+                return JsonResponse({"message": "Email verified successfully"})
+
+            return JsonResponse({"error": "Invalid OTP"}, status=400)
+
+        except:
+            return JsonResponse({"error": "User not found"}, status=404)
 
 
 # ======================================================
@@ -79,7 +121,6 @@ def login_user(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-
             username = data.get("username")
             password = data.get("password")
 
@@ -89,6 +130,9 @@ def login_user(request):
                 return JsonResponse({"error": "Invalid credentials"}, status=400)
 
             profile = UserProfile.objects.get(user=user)
+
+            if not profile.email_verified:
+                return JsonResponse({"error": "Email not verified"}, status=403)
 
             if profile.expiry_date and profile.expiry_date < timezone.now().date():
                 return JsonResponse({"error": "Subscription expired"}, status=403)
