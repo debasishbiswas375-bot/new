@@ -1,15 +1,12 @@
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
 from .models import Plan, UserProfile
 import json
 
 
-# ==============================
-# REGISTER USER
-# ==============================
+# REGISTER
 def register_user(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -27,7 +24,6 @@ def register_user(request):
             password=make_password(password)
         )
 
-        # Create Free Plan if not exists
         free_plan, _ = Plan.objects.get_or_create(
             name="Free",
             defaults={"default_credits": 100}
@@ -44,9 +40,7 @@ def register_user(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
-# ==============================
-# LOGIN USER
-# ==============================
+# LOGIN
 def login_user(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -64,9 +58,7 @@ def login_user(request):
     return JsonResponse({"error": "Invalid request"}, status=400)
 
 
-# ==============================
-# USER INFO (Plan + Credits)
-# ==============================
+# USER INFO
 def user_info(request):
     username = request.GET.get("username")
 
@@ -83,9 +75,7 @@ def user_info(request):
         return JsonResponse({"error": "User not found"}, status=404)
 
 
-# ==============================
-# FILE CONVERSION (TRACK USAGE)
-# ==============================
+# CONVERT FILE
 def convert_file(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -97,7 +87,6 @@ def convert_file(request):
             if profile.credits <= 0:
                 return JsonResponse({"error": "No credits left"}, status=400)
 
-            # Simulate conversion
             profile.credits -= 1
             profile.files_converted += 1
             profile.save()
