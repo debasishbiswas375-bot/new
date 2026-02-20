@@ -1,123 +1,66 @@
-import streamlit as st
-import requests
+VERIFY_URL = f"{DJANGO_URL}/verify-email/"
 
-# ===============================
-# DJANGO BACKEND URL
-# ===============================
-DJANGO_URL = "https://accountingexpert.onrender.com"
+with tab2:
 
-REGISTER_URL = f"{DJANGO_URL}/register/"
-LOGIN_URL = f"{DJANGO_URL}/login/"
+    full_name = st.text_input("Full Name")
+    new_u = st.text_input("New Username")
+    email = st.text_input("Email")
+    new_p = st.text_input("New Password", type="password")
 
+    company = st.text_input("Company (Optional)")
+    phone = st.text_input("Phone Number")
+    address = st.text_area("Address")
+    pin_code = st.text_input("PIN Code")
 
-def safe_json(response):
-    """
-    Safely return JSON if possible,
-    otherwise return raw text.
-    """
-    try:
-        return response.json()
-    except:
-        return {"error": response.text}
+    district = ""
+    state = ""
 
+    if len(pin_code) == 6:
+        try:
+            res = requests.get(f"https://api.postalpincode.in/pincode/{pin_code}")
+            data = res.json()
+            if data[0]["Status"] == "Success":
+                district = data[0]["PostOffice"][0]["District"]
+                state = data[0]["PostOffice"][0]["State"]
+                st.success(f"{district}, {state}")
+        except:
+            pass
 
-def app():
-    st.title("🔐 Access Portal")
+    if st.button("Register"):
+        response = requests.post(
+            REGISTER_URL,
+            json={
+                "username": new_u,
+                "email": email,
+                "password": new_p,
+                "full_name": full_name,
+                "company": company,
+                "phone": phone,
+                "address": address,
+                "pin_code": pin_code,
+                "district": district,
+                "state": state,
+            }
+        )
 
-    tab1, tab2 = st.tabs(["Login", "Register"])
+        st.success(response.json().get("message"))
 
-    # ==================================================
-    # LOGIN SECTION
-    # ==================================================
-    with tab1:
-        username = st.text_input("Username", key="login_user")
-        password = st.text_input("Password", type="password", key="login_pass")
+    st.divider()
 
-        if st.button("Login"):
+    st.subheader("Verify Email")
+    otp_user = st.text_input("Username for OTP")
+    otp = st.text_input("Enter OTP")
 
-            if not username or not password:
-                st.warning("Please fill all fields.")
-                return
+    if st.button("Verify Email"):
+        response = requests.post(
+            VERIFY_URL,
+            json={
+                "username": otp_user,
+                "otp": otp
+            }
+        )
 
-            try:
-                response = requests.post(
-                    LOGIN_URL,
-                    json={
-                        "username": username,
-                        "password": password
-                    },
-                    timeout=10
-                )
-
-                st.write("Status Code:", response.status_code)
-
-                data = safe_json(response)
-
-                if response.status_code == 200:
-                    st.session_state.logged_in = True
-                    st.session_state.username = username
-                    st.success("Login successful ✅")
-
-                else:
-                    st.error(data.get("error", "Login failed"))
-
-            except Exception as e:
-                st.error(f"Connection Error: {e}")
-
-    # ==================================================
-    # REGISTER SECTION
-    # ==================================================
-    with tab2:
-        new_u = st.text_input("New Username", key="reg_user")
-        email = st.text_input("Email", key="reg_email")
-        new_p = st.text_input("New Password", type="password", key="reg_pass")
-
-        if st.button("Register"):
-
-            if not new_u or not email or not new_p:
-                st.warning("Please fill all fields.")
-                return
-
-            try:
-                response = requests.post(
-                    REGISTER_URL,
-                    json={
-                        "username": new_u,
-                        "email": email,
-                        "password": new_p
-                    },
-                    timeout=10
-                )
-
-                st.write("Status Code:", response.status_code)
-                st.write("Raw Response:", response.text)
-
-                data = safe_json(response)
-
-                if response.status_code in [200, 201]:
-                    st.success("Registered successfully! Please login. ✅")
-
-                else:
-                    st.error(data.get("error", "Registration failed"))
-
-            except Exception as e:
-                st.error(f"Connection Error: {e}")
-
-
-# ==================================================
-# DASHBOARD AFTER LOGIN
-# ==================================================
-if "logged_in" in st.session_state and st.session_state.logged_in:
-
-    st.sidebar.title("Menu")
-    menu = st.sidebar.selectbox("Choose", ["Dashboard"])
-
-    username = st.session_state.username
-
-    if menu == "Dashboard":
-        st.header("Welcome 🎉")
-        st.write(f"Logged in as: **{username}**")
-
-
-if __name__ == "__main__":
-    app()
+        if response.status_code == 200:
+            st.success("Email verified successfully!")
+        else:
+            st.error(response.json().get("error"))
