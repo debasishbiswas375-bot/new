@@ -1,6 +1,11 @@
 from django.contrib import admin
 from django.urls import path
-from .views import register_user, login_user, user_info, convert_file
+from converter.views import (
+    register_user,
+    login_user,
+    user_info,
+    convert_file
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
