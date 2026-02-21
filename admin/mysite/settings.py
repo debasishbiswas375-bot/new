@@ -12,15 +12,15 @@ SECRET_KEY = os.environ.get(
     'django-insecure-accounting-expert-final-2026'
 )
 
-# CRITICAL: Define DEBUG at the top so it can be used later
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
-# Add this near ALLOWED_HOSTS
+
 CSRF_TRUSTED_ORIGINS = [
     'https://accountingexpert.onrender.com',
     'https://newtool.streamlit.app'
 ]
+
 # =========================
 # 2. APPLICATION DEFINITION
 # =========================
@@ -49,7 +49,6 @@ MIDDLEWARE = [
 # =========================
 # 3. URLS & WSGI (NAMESPACE FIX)
 # =========================
-# Since your folder is named 'mysite', these must point to 'mysite'
 ROOT_URLCONF = 'mysite.urls'
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
@@ -72,24 +71,16 @@ TEMPLATES = [
 # =========================
 # 4. DATABASE CONFIG (SUPABASE)
 # =========================
+# We removed the 'if/else' block. Django MUST use the Supabase URL now.
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-if DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True
-        )
-    }
-else:
-    # Fallback for local development
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
+DATABASES = {
+    "default": dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=True
+    )
+}
 
 # =========================
 # 5. STATIC FILES (RENDER)
@@ -103,9 +94,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # =========================
 # 6. RENDER SECURITY SETTINGS
 # =========================
-# These must be at the bottom to ensure DEBUG is already defined
 if not DEBUG:
-    # Fixes the Login Refresh loop on Render
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -113,6 +102,7 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
