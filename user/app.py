@@ -12,7 +12,7 @@ st.set_page_config(
 )
 
 # ==================================================
-# 2. SESSION STATE
+# 2. SESSION STATE & NAVIGATION
 # ==================================================
 if "current_page" not in st.session_state:
     st.session_state.current_page = "Dashboard"
