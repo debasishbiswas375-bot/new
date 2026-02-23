@@ -35,7 +35,7 @@ DATABASES = {
 # =========================================================
 INSTALLED_APPS = [
 
-    # Jazzmin MUST be before admin
+    # Jazzmin MUST stay first
     "jazzmin",
 
     "django.contrib.admin",
@@ -50,11 +50,14 @@ INSTALLED_APPS = [
 
 
 # =========================================================
-# 🧩 MIDDLEWARE
+# 🧩 MIDDLEWARE (ORDER VERY IMPORTANT)
 # =========================================================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+
+    # MUST be right after SecurityMiddleware
     "whitenoise.middleware.WhiteNoiseMiddleware",
+
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -99,10 +102,13 @@ USE_TZ = True
 
 
 # =========================================================
-# 📂 STATIC FILES (RENDER PRODUCTION READY)
+# 📂 STATIC FILES (FIX FOR JAZZMIN DROPDOWN)
 # =========================================================
 STATIC_URL = "/static/"
+
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+STATICFILES_DIRS = []
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
@@ -111,7 +117,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # =========================================================
-# 🔐 RENDER HTTPS FIX (VERY IMPORTANT)
+# 🔐 RENDER HTTPS FIX
 # =========================================================
 CSRF_TRUSTED_ORIGINS = [
     "https://accountingexpert.onrender.com",
@@ -123,9 +129,8 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 
-
 # =========================================================
-# 🎨 JAZZMIN CLEAN SETTINGS (LOGOUT ENABLED)
+# 🎨 JAZZMIN CLEAN SETTINGS
 # =========================================================
 JAZZMIN_SETTINGS = {
     "site_title": "Accounting Expert Admin",
@@ -136,12 +141,12 @@ JAZZMIN_SETTINGS = {
 
     "show_sidebar": True,
     "navigation_expanded": True,
-
-    # Disable theme/color builder
     "show_ui_builder": False,
 
-    # IMPORTANT: Remove topmenu_links to restore logout
-    # DO NOT add topmenu_links
+    # Show text beside user icon
+    "navbar_small_text": False,
+
+    # DO NOT ADD topmenu_links (it breaks logout dropdown)
 
     "icons": {
         "auth.User": "fas fa-user",
@@ -156,8 +161,6 @@ JAZZMIN_UI_TWEAKS = {
     "navbar": "navbar-dark navbar-primary",
     "sidebar": "sidebar-dark-primary",
     "accent": "accent-primary",
-
-    # Fixed theme (no dark mode switch)
     "theme": "cosmo",
     "dark_mode_theme": None,
 }
