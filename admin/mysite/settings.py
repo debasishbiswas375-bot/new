@@ -8,10 +8,10 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["accountingexpert.onrender.com"]
 
 
-# ================= DATABASE (SUPABASE POSTGRES - POOLER) =================
+# ================= DATABASE (SUPABASE POOLER) =================
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -83,23 +83,43 @@ USE_TZ = True
 # ================= STATIC FILES =================
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
-# ================= DEFAULT AUTO FIELD =================
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-# ================= JAZZMIN PROFESSIONAL SETTINGS =================
+# =========================================================
+# 🔐 RENDER PRODUCTION FIX (VERY IMPORTANT)
+# =========================================================
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://accountingexpert.onrender.com",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+
+# =========================================================
+# 🎨 JAZZMIN PROFESSIONAL SETTINGS
+# =========================================================
+
 JAZZMIN_SETTINGS = {
     "site_title": "Accounting Expert Admin",
     "site_header": "Accounting Expert",
     "site_brand": "Accounting Expert",
     "welcome_sign": "Welcome to Accounting Expert Dashboard",
+
     "copyright": "Accounting Expert Pvt Ltd",
 
     "show_sidebar": True,
     "navigation_expanded": True,
-    "show_ui_builder": False,
+
+    # ✅ Enable theme switcher (Light/Dark toggle)
+    "show_ui_builder": True,
 
     "icons": {
         "auth.User": "fas fa-user",
@@ -114,21 +134,30 @@ JAZZMIN_SETTINGS = {
 }
 
 
-# ================= JAZZMIN UI THEME =================
+# =========================================================
+# 🎨 UI TWEAKS (USER ICON + NAVBAR FIX)
+# =========================================================
+
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "footer_small_text": False,
     "body_small_text": False,
     "brand_small_text": False,
     "sidebar_nav_small_text": False,
-    "accent": "accent-primary",
-    "navbar": "navbar-dark navbar-primary",
+
+    # 🔥 Navbar visible and clean
+    "navbar": "navbar-white navbar-light",
+
     "no_navbar_border": False,
     "sidebar": "sidebar-dark-primary",
+    "accent": "accent-primary",
+
     "sidebar_nav_child_indent": True,
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "darkly",
+
+    # Default theme
+    "theme": "cosmo",
     "dark_mode_theme": "darkly",
 }
