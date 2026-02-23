@@ -3,7 +3,6 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # =========================================================
 # 🔐 SECURITY
 # =========================================================
@@ -25,7 +24,7 @@ DATABASES = {
         "PASSWORD": os.environ.get("DB_PASSWORD"),
         "HOST": os.environ.get("DB_HOST"),
         "PORT": os.environ.get("DB_PORT"),
-        "CONN_MAX_AGE": 0,
+        "CONN_MAX_AGE": 0,   # 🔥 VERY IMPORTANT (fix slow login)
     }
 }
 
@@ -35,7 +34,7 @@ DATABASES = {
 # =========================================================
 INSTALLED_APPS = [
 
-    # Jazzmin MUST stay first
+    # Jazzmin must be first
     "jazzmin",
 
     "django.contrib.admin",
@@ -50,14 +49,11 @@ INSTALLED_APPS = [
 
 
 # =========================================================
-# 🧩 MIDDLEWARE (ORDER VERY IMPORTANT)
+# 🧩 MIDDLEWARE
 # =========================================================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-
-    # MUST be right after SecurityMiddleware
     "whitenoise.middleware.WhiteNoiseMiddleware",
-
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -102,15 +98,15 @@ USE_TZ = True
 
 
 # =========================================================
-# 📂 STATIC FILES (FIX FOR JAZZMIN DROPDOWN)
+# 📂 STATIC FILES
 # =========================================================
 STATIC_URL = "/static/"
-
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 STATICFILES_DIRS = []
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+# 🔥 Use Manifest for better caching
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -130,26 +126,19 @@ CSRF_COOKIE_SECURE = True
 
 
 # =========================================================
-# 🎨 JAZZMIN CLEAN SETTINGS
+# 🎨 JAZZMIN SETTINGS (CLEAN + FAST)
 # =========================================================
 JAZZMIN_SETTINGS = {
     "site_title": "Accounting Expert Admin",
     "site_header": "Accounting Expert",
     "site_brand": "Accounting Expert",
     "welcome_sign": "Welcome to Accounting Expert Dashboard",
-    "copyright": "Accounting Expert Pvt Ltd",
 
     "show_sidebar": True,
     "navigation_expanded": True,
     "show_ui_builder": False,
-    "usermenu_links": [
-    {"name": "Logout", "url": "admin:logout"},
-],
 
-    # Show text beside user icon
-    "navbar_small_text": False,
-
-    # DO NOT ADD topmenu_links (it breaks logout dropdown)
+    # 🔥 DO NOT add usermenu_links (fix logout dropdown)
 
     "icons": {
         "auth.User": "fas fa-user",
