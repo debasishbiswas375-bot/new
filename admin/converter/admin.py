@@ -1,73 +1,17 @@
 from django.contrib import admin
-from django.contrib.admin import AdminSite
-from django.urls import path
-from django.template.response import TemplateResponse
+from django.contrib.auth.models import User
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Count
 from django.utils.timezone import now
 from datetime import timedelta
-
-from django.contrib.auth.models import User
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import Plan, UserProfile
 
 
 # ==========================================
-# 🔥 CUSTOM ADMIN SITE
+# PLAN ADMIN
 # ==========================================
-class CustomAdminSite(AdminSite):
-    site_header = "Accounting Expert"
-    site_title = "Accounting Expert Admin"
-    index_title = "Dashboard"
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path("", self.admin_view(self.dashboard), name="index"),
-        ]
-        return custom_urls + urls
-
-    def dashboard(self, request):
-        today = now().date()
-        week_ago = today - timedelta(days=7)
-
-        total_users = User.objects.count()
-        total_plans = Plan.objects.count()
-
-        users_week = User.objects.filter(
-            date_joined__date__gte=week_ago
-        ).count()
-
-        weekly_data = (
-            User.objects.filter(date_joined__date__gte=week_ago)
-            .extra(select={"day": "date(date_joined)"})
-            .values("day")
-            .annotate(count=Count("id"))
-            .order_by("day")
-        )
-
-        labels = [str(entry["day"]) for entry in weekly_data]
-        data = [entry["count"] for entry in weekly_data]
-
-        context = dict(
-            self.each_context(request),
-            total_users=total_users,
-            total_plans=total_plans,
-            users_week=users_week,
-            chart_labels=labels,
-            chart_data=data,
-        )
-
-        return TemplateResponse(request, "admin/dashboard.html", context)
-
-
-admin_site = CustomAdminSite(name="custom_admin")
-
-
-# ==========================================
-# 🔥 PLAN ADMIN (SHOW ALL DETAILS)
-# ==========================================
-@admin.register(Plan, site=admin_site)
+@admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
     list_display = (
         "name",
@@ -85,7 +29,7 @@ class PlanAdmin(admin.ModelAdmin):
 
 
 # ==========================================
-# 🔥 USER PROFILE INLINE
+# USER PROFILE INLINE
 # ==========================================
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
@@ -94,7 +38,7 @@ class UserProfileInline(admin.StackedInline):
 
 
 # ==========================================
-# 🔥 OPTIMIZED USER ADMIN (FAST)
+# OPTIMIZED USER ADMIN
 # ==========================================
 class CustomUserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
@@ -110,9 +54,9 @@ class CustomUserAdmin(BaseUserAdmin):
         "is_staff",
     )
 
-    list_select_related = ("userprofile",)
-
     search_fields = ("username", "email", "first_name", "last_name")
+
+    list_select_related = ("userprofile",)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -137,5 +81,9 @@ class CustomUserAdmin(BaseUserAdmin):
     get_expiry.short_description = "Expiry Date"
 
 
-admin_site.register(User, CustomUserAdmin)
-admin_site.register(UserProfile)
+# Unregister default User admin
+admin.site.unregister(User)
+
+# Register new one
+admin.site.register(User, CustomUserAdmin)
+admin.site.register(UserProfile)
