@@ -1,5 +1,6 @@
 from django.contrib.admin import AdminSite
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.contrib import admin
 from .models import Plan, UserProfile
 
@@ -20,8 +21,9 @@ class MyAdminSite(AdminSite):
 
 admin_site = MyAdminSite(name="myadmin")
 
-# Register models
-admin_site.register(User)
-admin_site.register(Group)
+
+# Register with proper admin classes
+admin_site.register(User, UserAdmin)
+admin_site.register(Group, GroupAdmin)
 admin_site.register(Plan)
 admin_site.register(UserProfile)
