@@ -49,7 +49,7 @@ MIDDLEWARE = [
 ]
 
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = 'admin.urls'
 
 
 TEMPLATES = [
@@ -68,7 +68,7 @@ TEMPLATES = [
 ]
 
 
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = 'admin.wsgi.application'
 
 
 AUTH_PASSWORD_VALIDATORS = []
