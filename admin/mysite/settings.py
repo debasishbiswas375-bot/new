@@ -123,8 +123,9 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
 
+
 # =========================================================
-# 🎨 JAZZMIN PROFESSIONAL SETTINGS (NO COLOR SWITCHER)
+# 🎨 JAZZMIN CLEAN SETTINGS (LOGOUT ENABLED)
 # =========================================================
 JAZZMIN_SETTINGS = {
     "site_title": "Accounting Expert Admin",
@@ -136,8 +137,11 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
 
-    # 🚫 Disable theme/color builder
+    # Disable theme/color builder
     "show_ui_builder": False,
+
+    # IMPORTANT: Remove topmenu_links to restore logout
+    # DO NOT add topmenu_links
 
     "icons": {
         "auth.User": "fas fa-user",
@@ -145,10 +149,6 @@ JAZZMIN_SETTINGS = {
         "converter.Plan": "fas fa-box",
         "converter.UserProfile": "fas fa-id-card",
     },
-
-    "topmenu_links": [
-        {"name": "View Website", "url": "/", "new_window": True},
-    ],
 }
 
 
@@ -157,7 +157,7 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar": "sidebar-dark-primary",
     "accent": "accent-primary",
 
-    # Fixed theme (no dark mode toggle)
+    # Fixed theme (no dark mode switch)
     "theme": "cosmo",
     "dark_mode_theme": None,
 }
