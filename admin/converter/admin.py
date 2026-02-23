@@ -12,9 +12,9 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import Plan, UserProfile
 
 
-# =========================
+# ==========================================
 # 🔥 CUSTOM ADMIN SITE
-# =========================
+# ==========================================
 class CustomAdminSite(AdminSite):
     site_header = "Accounting Expert"
     site_title = "Accounting Expert Admin"
@@ -30,15 +30,13 @@ class CustomAdminSite(AdminSite):
     def dashboard(self, request):
         today = now().date()
         week_ago = today - timedelta(days=7)
-        month_ago = today - timedelta(days=30)
 
         total_users = User.objects.count()
         total_plans = Plan.objects.count()
-        total_profiles = UserProfile.objects.count()
 
-        users_today = User.objects.filter(date_joined__date=today).count()
-        users_week = User.objects.filter(date_joined__date__gte=week_ago).count()
-        users_month = User.objects.filter(date_joined__date__gte=month_ago).count()
+        users_week = User.objects.filter(
+            date_joined__date__gte=week_ago
+        ).count()
 
         weekly_data = (
             User.objects.filter(date_joined__date__gte=week_ago)
@@ -55,10 +53,7 @@ class CustomAdminSite(AdminSite):
             self.each_context(request),
             total_users=total_users,
             total_plans=total_plans,
-            total_profiles=total_profiles,
-            users_today=users_today,
             users_week=users_week,
-            users_month=users_month,
             chart_labels=labels,
             chart_data=data,
         )
@@ -69,18 +64,38 @@ class CustomAdminSite(AdminSite):
 admin_site = CustomAdminSite(name="custom_admin")
 
 
-# =========================
-# 🔥 INLINE USER PROFILE
-# =========================
+# ==========================================
+# 🔥 PLAN ADMIN (SHOW ALL DETAILS)
+# ==========================================
+@admin.register(Plan, site=admin_site)
+class PlanAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "price",
+        "credit_limit",
+        "duration_display",
+    )
+
+    search_fields = ("name",)
+    list_filter = ("duration_months",)
+
+    def duration_display(self, obj):
+        return f"{obj.duration_months} Month(s)"
+    duration_display.short_description = "Duration"
+
+
+# ==========================================
+# 🔥 USER PROFILE INLINE
+# ==========================================
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     can_delete = False
     extra = 0
 
 
-# =========================
-# 🔥 EXTENDED USER ADMIN
-# =========================
+# ==========================================
+# 🔥 OPTIMIZED USER ADMIN (FAST)
+# ==========================================
 class CustomUserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
 
@@ -90,9 +105,18 @@ class CustomUserAdmin(BaseUserAdmin):
         "last_name",
         "email",
         "get_plan",
+        "get_credits",
         "get_expiry",
         "is_staff",
     )
+
+    list_select_related = ("userprofile",)
+
+    search_fields = ("username", "email", "first_name", "last_name")
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related("userprofile")
 
     def get_plan(self, obj):
         if hasattr(obj, "userprofile") and obj.userprofile.plan:
@@ -100,16 +124,18 @@ class CustomUserAdmin(BaseUserAdmin):
         return "-"
     get_plan.short_description = "Plan"
 
+    def get_credits(self, obj):
+        if hasattr(obj, "userprofile"):
+            return obj.userprofile.user_credits
+        return "-"
+    get_credits.short_description = "Credits"
+
     def get_expiry(self, obj):
         if hasattr(obj, "userprofile") and obj.userprofile.expiry_date:
             return obj.userprofile.expiry_date
         return "-"
-    get_expiry.short_description = "Renewal Date"
+    get_expiry.short_description = "Expiry Date"
 
 
-# =========================
-# REGISTER MODELS
-# =========================
 admin_site.register(User, CustomUserAdmin)
-admin_site.register(Plan)
 admin_site.register(UserProfile)
