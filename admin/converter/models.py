@@ -15,7 +15,7 @@ class Plan(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="userprofile")
     plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, blank=True)
 
     user_credits = models.IntegerField(default=0)
