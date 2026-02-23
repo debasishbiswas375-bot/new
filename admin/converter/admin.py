@@ -1,29 +1,5 @@
-from django.contrib.admin import AdminSite
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.contrib import admin
 from .models import Plan, UserProfile
 
-
-class MyAdminSite(AdminSite):
-    site_header = "Accounting Expert"
-    site_title = "Accounting Expert Admin"
-    index_title = "Dashboard"
-    index_template = "admin/dashboard.html"
-
-    def index(self, request, extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["total_users"] = User.objects.count()
-        extra_context["total_plans"] = Plan.objects.count()
-        extra_context["total_profiles"] = UserProfile.objects.count()
-        return super().index(request, extra_context=extra_context)
-
-
-admin_site = MyAdminSite(name="myadmin")
-
-
-# Register with proper admin classes
-admin_site.register(User, UserAdmin)
-admin_site.register(Group, GroupAdmin)
-admin_site.register(Plan)
-admin_site.register(UserProfile)
+admin.site.register(Plan)
+admin.site.register(UserProfile)
