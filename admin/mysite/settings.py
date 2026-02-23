@@ -141,7 +141,10 @@ JAZZMIN_SETTINGS = {
 
     "show_sidebar": True,
     "navigation_expanded": True,
-    "show_ui_builder": True,
+    "show_ui_builder": False,
+    "usermenu_links": [
+    {"name": "Logout", "url": "admin:logout"},
+],
 
     # Show text beside user icon
     "navbar_small_text": False,
