@@ -3,7 +3,10 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ================= SECURITY =================
+
+# =========================================================
+# 🔐 SECURITY
+# =========================================================
 SECRET_KEY = os.environ.get("SECRET_KEY")
 
 DEBUG = False
@@ -11,7 +14,9 @@ DEBUG = False
 ALLOWED_HOSTS = ["accountingexpert.onrender.com"]
 
 
-# ================= DATABASE (SUPABASE POOLER) =================
+# =========================================================
+# 🗄 DATABASE (SUPABASE / POSTGRES)
+# =========================================================
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -24,10 +29,12 @@ DATABASES = {
 }
 
 
-# ================= INSTALLED APPS =================
+# =========================================================
+# 📦 INSTALLED APPS
+# =========================================================
 INSTALLED_APPS = [
 
-    # 🔥 Jazzmin MUST be before admin
+    # Jazzmin MUST be before admin
     "jazzmin",
 
     "django.contrib.admin",
@@ -41,7 +48,9 @@ INSTALLED_APPS = [
 ]
 
 
-# ================= MIDDLEWARE =================
+# =========================================================
+# 🧩 MIDDLEWARE
+# =========================================================
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -72,27 +81,37 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "mysite.wsgi.application"
 
+
+# =========================================================
+# 🔐 PASSWORD VALIDATION
+# =========================================================
 AUTH_PASSWORD_VALIDATORS = []
 
+
+# =========================================================
+# 🌍 INTERNATIONALIZATION
+# =========================================================
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
 
-# ================= STATIC FILES =================
+# =========================================================
+# 📂 STATIC FILES (RENDER PRODUCTION READY)
+# =========================================================
 STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 # =========================================================
-# 🔐 RENDER PRODUCTION FIX (VERY IMPORTANT)
+# 🔐 RENDER HTTPS FIX (VERY IMPORTANT)
 # =========================================================
-
 CSRF_TRUSTED_ORIGINS = [
     "https://accountingexpert.onrender.com",
 ]
@@ -104,22 +123,20 @@ CSRF_COOKIE_SECURE = True
 
 
 # =========================================================
-# 🎨 JAZZMIN PROFESSIONAL SETTINGS
+# 🎨 JAZZMIN PROFESSIONAL SETTINGS (NO COLOR SWITCHER)
 # =========================================================
-
 JAZZMIN_SETTINGS = {
     "site_title": "Accounting Expert Admin",
     "site_header": "Accounting Expert",
     "site_brand": "Accounting Expert",
     "welcome_sign": "Welcome to Accounting Expert Dashboard",
-
     "copyright": "Accounting Expert Pvt Ltd",
 
     "show_sidebar": True,
     "navigation_expanded": True,
 
-    # ✅ Enable theme switcher (Light/Dark toggle)
-    "show_ui_builder": True,
+    # 🚫 Disable theme/color builder
+    "show_ui_builder": False,
 
     "icons": {
         "auth.User": "fas fa-user",
@@ -134,30 +151,12 @@ JAZZMIN_SETTINGS = {
 }
 
 
-# =========================================================
-# 🎨 UI TWEAKS (USER ICON + NAVBAR FIX)
-# =========================================================
-
 JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "sidebar_nav_small_text": False,
-
-    # 🔥 Navbar visible and clean
-    "navbar": "navbar-white navbar-light",
-
-    "no_navbar_border": False,
+    "navbar": "navbar-dark navbar-primary",
     "sidebar": "sidebar-dark-primary",
     "accent": "accent-primary",
 
-    "sidebar_nav_child_indent": True,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-
-    # Default theme
+    # Fixed theme (no dark mode toggle)
     "theme": "cosmo",
-    "dark_mode_theme": "darkly",
+    "dark_mode_theme": None,
 }
