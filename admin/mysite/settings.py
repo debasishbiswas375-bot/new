@@ -1,66 +1,59 @@
 import os
 from pathlib import Path
-import dj_database_url
 
-# =========================
-# 1. CORE PATHS & SECURITY
-# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-accounting-expert-final-2026'
-)
+SECRET_KEY = 'your-secret-key-here'
 
-# CRITICAL: Define DEBUG at the top so it can be used later
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
-# Add this near ALLOWED_HOSTS
-CSRF_TRUSTED_ORIGINS = [
-    'https://accountingexpert.onrender.com',
-    'https://newtool.streamlit.app'
-]
-# =========================
-# 2. APPLICATION DEFINITION
-# =========================
+
+
+# ================= DATABASE (SUPABASE) =================
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'YOUR_SUPABASE_PASSWORD',
+        'HOST': 'db.YOUR_PROJECT_ID.supabase.co',
+        'PORT': '5432',
+    }
+}
+
+
+# ================= INSTALLED APPS =================
 INSTALLED_APPS = [
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'converter',
 ]
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# =========================
-# 3. URLS & WSGI (NAMESPACE FIX)
-# =========================
-# Since your folder is named 'mysite', these must point to 'mysite'
-ROOT_URLCONF = 'mysite.urls'
-WSGI_APPLICATION = 'mysite.wsgi.application'
+ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -69,47 +62,15 @@ TEMPLATES = [
     },
 ]
 
-# =========================
-# 4. DATABASE CONFIG (SUPABASE)
-# =========================
-DATABASE_URL = os.environ.get("DATABASE_URL")
+WSGI_APPLICATION = 'project.wsgi.application'
 
-if DATABASE_URL:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            ssl_require=True
-        )
-    }
-else:
-    # Fallback for local development
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-    }
 
-# =========================
-# 5. STATIC FILES (RENDER)
-# =========================
+AUTH_PASSWORD_VALIDATORS = []
+
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_TZ = True
+
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# =========================
-# 6. RENDER SECURITY SETTINGS
-# =========================
-# These must be at the bottom to ensure DEBUG is already defined
-if not DEBUG:
-    # Fixes the Login Refresh loop on Render
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_SSL_REDIRECT = True
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
