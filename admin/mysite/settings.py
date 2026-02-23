@@ -141,7 +141,7 @@ JAZZMIN_SETTINGS = {
 
     "show_sidebar": True,
     "navigation_expanded": True,
-    "show_ui_builder": False,
+    "show_ui_builder": True,
 
     # Show text beside user icon
     "navbar_small_text": False,
