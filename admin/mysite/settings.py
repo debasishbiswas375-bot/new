@@ -3,22 +3,23 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'th9nigy8ai!!&%_b_$tl*-pxn-xz^drr(t2k_ss9bcltxcp)!1'
+# ================= SECURITY =================
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
 
-# ================= DATABASE (SUPABASE) =================
+# ================= DATABASE (SUPABASE POSTGRES) =================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'Deba9002043666',
-        'HOST': 'db.drktezrfydyzychmthlp.supabase.co',
-        'PORT': '5432',
+        'NAME': os.environ.get("DB_NAME"),
+        'USER': os.environ.get("DB_USER"),
+        'PASSWORD': os.environ.get("DB_PASSWORD"),
+        'HOST': os.environ.get("DB_HOST"),
+        'PORT': os.environ.get("DB_PORT"),
     }
 }
 
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
 ]
 
 
+# ================= MIDDLEWARE =================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -45,7 +47,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
+
 ROOT_URLCONF = 'project.urls'
+
 
 TEMPLATES = [
     {
@@ -62,15 +66,19 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'project.wsgi.application'
 
 
 AUTH_PASSWORD_VALIDATORS = []
+
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+
 STATIC_URL = '/static/'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
