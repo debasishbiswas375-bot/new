@@ -27,5 +27,17 @@ class UserProfile(models.Model):
         self.expiry_date = timezone.now().date() + timedelta(days=30 * plan.duration_months)
         self.save()
 
+    def is_active(self):
+        if not self.expiry_date:
+            return False
+        return self.expiry_date >= timezone.now().date()
+
+    def use_credit(self):
+        if self.user_credits <= 0:
+            return False
+        self.user_credits -= 1
+        self.save()
+        return True
+
     def __str__(self):
         return self.user.username
