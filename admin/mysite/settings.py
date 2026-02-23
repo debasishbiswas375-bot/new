@@ -16,15 +16,15 @@ ALLOWED_HOSTS = ["accountingexpert.onrender.com"]
 # =========================================================
 # 🗄 DATABASE (SUPABASE / POSTGRES)
 # =========================================================
+import dj_database_url
+
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
-        "HOST": os.environ.get("DB_HOST"),
-        "PORT": os.environ.get("DB_PORT"),
-        "CONN_MAX_AGE": 0,   # 🔥 VERY IMPORTANT (fix slow login)
+    "default": dj_database_url.config(
+        default=None,
+        conn_max_age=0,
+        ssl_require=True
+    )
+}
     }
 }
 
