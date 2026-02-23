@@ -1,10 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.db.models import Count
-from django.utils.timezone import now
-from datetime import timedelta
-
 from .models import Plan, UserProfile
 
 
@@ -19,7 +15,6 @@ class PlanAdmin(admin.ModelAdmin):
         "credit_limit",
         "duration_display",
     )
-
     search_fields = ("name",)
     list_filter = ("duration_months",)
 
@@ -29,24 +24,33 @@ class PlanAdmin(admin.ModelAdmin):
 
 
 # ==========================================
-# USER PROFILE INLINE
+# USER PROFILE ADMIN
 # ==========================================
-class UserProfileInline(admin.StackedInline):
-    model = UserProfile
-    can_delete = False
-    extra = 0
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "get_plan",
+        "user_credits",
+        "expiry_date",
+    )
+
+    search_fields = ("user__username",)
+    list_select_related = ("user", "plan")
+
+    def get_plan(self, obj):
+        if obj.plan:
+            return obj.plan.name
+        return "-"
+    get_plan.short_description = "Plan"
 
 
 # ==========================================
-# OPTIMIZED USER ADMIN
+# CUSTOM USER ADMIN (Shows Plan + Credits)
 # ==========================================
 class CustomUserAdmin(BaseUserAdmin):
-    inlines = (UserProfileInline,)
-
     list_display = (
         "username",
-        "first_name",
-        "last_name",
         "email",
         "get_plan",
         "get_credits",
@@ -54,13 +58,11 @@ class CustomUserAdmin(BaseUserAdmin):
         "is_staff",
     )
 
-    search_fields = ("username", "email", "first_name", "last_name")
-
     list_select_related = ("userprofile",)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related("userprofile")
+        return qs.select_related("userprofile__plan")
 
     def get_plan(self, obj):
         if hasattr(obj, "userprofile") and obj.userprofile.plan:
@@ -78,12 +80,8 @@ class CustomUserAdmin(BaseUserAdmin):
         if hasattr(obj, "userprofile") and obj.userprofile.expiry_date:
             return obj.userprofile.expiry_date
         return "-"
-    get_expiry.short_description = "Expiry Date"
+    get_expiry.short_description = "Expiry"
 
 
-# Unregister default User admin
 admin.site.unregister(User)
-
-# Register new one
 admin.site.register(User, CustomUserAdmin)
-admin.site.register(UserProfile)
