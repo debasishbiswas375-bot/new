@@ -5,8 +5,8 @@ from supabase import create_client
 # =============================
 # CONFIG
 # =============================
-SUPABASE_URL = "YOUR_SUPABASE_URL"
-SUPABASE_KEY = "YOUR_PUBLIC_ANON_KEY"
+SUPABASE_URL = "SUPABASE_URL"
+SUPABASE_KEY = "SUPABASE_KEY"
 DJANGO_API = "https://your-django-domain.com/api/convert/"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
