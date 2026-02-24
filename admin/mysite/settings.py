@@ -142,4 +142,7 @@ JAZZMIN_SETTINGS = {
     "site_header": "Accounting Expert",
     "welcome_sign": "Welcome to Accounting Expert",
     "user_avatar": None,
+    "topmenu_links": [
+    {"name": "Logout", "url": "/admin/logout/", "new_window": False},
+],
 }
