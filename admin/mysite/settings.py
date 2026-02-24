@@ -14,7 +14,11 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["accountingexpert.onrender.com"]
+ALLOWED_HOSTS = [
+    "accountingexpert.onrender.com",
+    "127.0.0.1",
+    "localhost",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://accountingexpert.onrender.com",
@@ -49,11 +53,14 @@ MIDDLEWARE = [
 ROOT_URLCONF = "mysite.urls"
 WSGI_APPLICATION = "mysite.wsgi.application"
 
+# =========================
+# 3. TEMPLATES
+# =========================
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
+        "DIRS": [BASE_DIR / "templates"],  # optional root templates
+        "APP_DIRS": True,  # IMPORTANT for converter/templates
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -66,7 +73,7 @@ TEMPLATES = [
 ]
 
 # =========================
-# 3. DATABASE CONFIG (Render / Supabase)
+# 4. DATABASE CONFIG (Render / Supabase)
 # =========================
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -88,16 +95,26 @@ else:
     }
 
 # =========================
-# 4. STATIC FILES (Render)
+# 5. STATIC FILES (Render)
 # =========================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# =========================
+# 6. LOGIN / LOGOUT SETTINGS
+# =========================
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+# =========================
+# 7. DEFAULT FIELD
+# =========================
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # =========================
-# 5. PRODUCTION SECURITY
+# 8. PRODUCTION SECURITY
 # =========================
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -109,7 +126,7 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # =========================
-# 6. EMAIL CONFIG
+# 9. EMAIL CONFIG
 # =========================
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
@@ -119,7 +136,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 # =========================
-# 7. JAZZMIN ADMIN UI
+# 10. JAZZMIN ADMIN UI
 # =========================
 JAZZMIN_SETTINGS = {
     "site_title": "Accounting Expert",
