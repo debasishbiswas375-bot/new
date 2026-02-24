@@ -54,4 +54,7 @@ class UserProfile(models.Model):
         self.save(update_fields=["plan", "user_credits", "expiry_date"])
 
     def __str__(self):
-        return self.user.username if self.user_id else f"Profile {self.id}"
+        # ULTRA SAFE — prevents 500 if user deleted
+        if self.user_id:
+            return self.user.username
+        return f"Orphaned Profile {self.id}"
