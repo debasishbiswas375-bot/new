@@ -1,3 +1,4 @@
+import sys
 from django.apps import AppConfig
 
 class ConverterConfig(AppConfig):
@@ -5,17 +6,18 @@ class ConverterConfig(AppConfig):
     name = 'converter'
 
     def ready(self):
-        # 1. Import signals
+        # Import signals so new users get profiles automatically
         import converter.signals
         
-        # 2. Self-Healing: Create missing profiles for existing users
-        from django.contrib.auth.models import User
-        try:
-            from .models import UserProfile
-            # This logic runs once every time the server starts
-            for user in User.objects.all():
-                if not hasattr(user, 'profile'):
-                    UserProfile.objects.get_or_create(user=user)
-        except Exception:
-            # This prevents build errors during the first-time migration
-            pass
+        # Self-Healing logic for existing users (admin, deba, etc.)
+        # We only run this if we are starting the actual web server
+        if 'runserver' in sys.argv or 'gunicorn' in sys.argv or 'mysite.wsgi' in sys.argv:
+            from django.contrib.auth.models import User
+            try:
+                from .models import UserProfile
+                for user in User.objects.all():
+                    # Check if profile exists; if not, create it
+                    if not hasattr(user, 'profile'):
+                        UserProfile.objects.get_or_create(user=user)
+            except Exception:
+                pass
