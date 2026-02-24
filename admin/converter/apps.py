@@ -5,4 +5,5 @@ class ConverterConfig(AppConfig):
     name = 'converter'
 
     def ready(self):
+        # This imports the signals when the app starts
         import converter.signals
