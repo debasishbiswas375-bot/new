@@ -1,17 +1,14 @@
 import streamlit as st
 
-st.title("Dashboard")
+st.markdown('<div class="page-title">Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="breadcrumb">Home › Dashboard</div>', unsafe_allow_html=True)
 
-if "user" not in st.session_state or not st.session_state.user:
-    st.warning("Please login first.")
-    st.stop()
+st.markdown('<div class="admin-card">', unsafe_allow_html=True)
 
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
-with col1:
-    st.metric("Credits Remaining", "50")
+col1.metric("Credits Remaining", "50")
+col2.metric("Current Plan", "Startup")
+col3.metric("Files Converted", "12")
 
-with col2:
-    st.metric("Plan", "Startup")
-
-st.write("Welcome,", st.session_state.user.email)
+st.markdown('</div>', unsafe_allow_html=True)
