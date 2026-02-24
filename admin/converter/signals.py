@@ -8,7 +8,7 @@ from .models import UserProfile
 def create_user_profile(sender, instance, created, **kwargs):
     """
     Create profile ONLY when user is first created.
-    This prevents infinite loop and 502 error during delete.
+    Prevents infinite loop and 502 on delete.
     """
     if created:
         UserProfile.objects.create(user=instance)
