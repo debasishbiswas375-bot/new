@@ -1,11 +1,26 @@
 from django.contrib import admin
 from django.urls import path
-from converter.views import register_user, login_user, get_plans, verify_email
+from django.contrib.auth import views as auth_views
+from django.shortcuts import redirect
+
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('register/', register_user),
-    path('verify-email/', verify_email),
-    path('login/', login_user),
-    path('plans/', get_plans),
+    path("admin/", admin.site.urls),
+
+    # LOGIN
+    path(
+        "login/",
+        auth_views.LoginView.as_view(
+            template_name="login.html",
+            redirect_authenticated_user=True
+        ),
+        name="login"
+    ),
+
+    # LOGOUT (secure POST version)
+    path(
+        "logout/",
+        auth_views.LogoutView.as_view(next_page="/"),
+        name="logout"
+    ),
 ]
