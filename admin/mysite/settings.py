@@ -11,7 +11,7 @@ SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     'django-insecure-accounting-expert-final-2026'
 )
-DATABASE_URL = os.environ.get(DATABASE_URL)
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 # CRITICAL: Define DEBUG at the top so it can be used later
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
