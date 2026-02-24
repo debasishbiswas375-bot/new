@@ -1,139 +1,99 @@
 import streamlit as st
-from supabase import create_client
 
-# ------------------------------------------------
-# PAGE CONFIG
-# ------------------------------------------------
-st.set_page_config(
-    page_title="Accounting Expert",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(layout="wide")
 
-# ------------------------------------------------
-# JAZZMIN STYLE CSS
-# ------------------------------------------------
+# ---------------- JAZZMIN CSS ----------------
 st.markdown("""
 <style>
 
-/* Remove Streamlit top space */
+/* GLOBAL BACKGROUND */
+body {
+    background-color: #f4f6f9;
+}
+
+/* REMOVE DEFAULT PADDING */
 .block-container {
-    padding-top: 1.5rem;
-    max-width: 1200px;
+    padding-top: 0.5rem;
+    max-width: 1400px;
 }
 
 /* SIDEBAR */
 [data-testid="stSidebar"] {
-    background: #2c3e50;
-    color: white;
+    background-color: #343a40;
+    width: 230px !important;
 }
 
 [data-testid="stSidebar"] * {
-    color: #ecf0f1 !important;
+    color: #c2c7d0 !important;
 }
 
-/* Top Navbar */
-.top-navbar {
+.sidebar-title {
+    font-size: 18px;
+    font-weight: 600;
+    padding: 15px;
+    color: white;
+}
+
+/* ACTIVE PAGE */
+.css-1d391kg {
+    background-color: #007bff !important;
+}
+
+/* TOP NAVBAR */
+.topbar {
     background: white;
     padding: 15px 25px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #dee2e6;
     margin-bottom: 25px;
-    border-radius: 8px;
 }
 
-/* Admin Cards */
+/* PAGE TITLE */
+.page-title {
+    font-size: 26px;
+    font-weight: 600;
+}
+
+/* BREADCRUMB */
+.breadcrumb {
+    color: #6c757d;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* ADMIN CARD */
 .admin-card {
     background: white;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    border-radius: 6px;
+    padding: 20px;
+    border: 1px solid #dee2e6;
     margin-bottom: 20px;
 }
 
-/* Section title */
-.section-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 15px;
-}
-
-/* Buttons */
+/* GREEN BUTTON */
 .stButton>button {
-    background-color: #1abc9c;
+    background-color: #28a745;
     color: white;
-    border-radius: 6px;
+    border-radius: 5px;
     border: none;
 }
 
 .stButton>button:hover {
-    background-color: #16a085;
-}
-
-body {
-    background-color: #ecf0f5;
+    background-color: #218838;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ------------------------------------------------
-# SUPABASE INIT
-# ------------------------------------------------
-try:
-    SUPABASE_URL = st.secrets["SUPABASE_URL"]
-    SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-except:
-    supabase = None
-
-# ------------------------------------------------
-# SESSION STATE
-# ------------------------------------------------
-if "user" not in st.session_state:
-    st.session_state.user = None
-if "token" not in st.session_state:
-    st.session_state.token = None
-
-# ------------------------------------------------
-# SIDEBAR CONTENT (Jazzmin Style)
-# ------------------------------------------------
+# ---------------- SIDEBAR ----------------
 with st.sidebar:
-    st.title("Accounting Expert")
+    st.markdown('<div class="sidebar-title">Django administration</div>', unsafe_allow_html=True)
+    st.page_link("pages/Dashboard.py", label="Dashboard")
+    st.page_link("pages/Plans.py", label="Plans")
 
-    if st.session_state.user:
-        st.success("Logged in")
-        if st.button("Logout"):
-            st.session_state.user = None
-            st.session_state.token = None
-            st.rerun()
-    else:
-        st.warning("Demo Mode")
-
-        email = st.text_input("Email")
-        password = st.text_input("Password", type="password")
-
-        if st.button("Login"):
-            if supabase:
-                res = supabase.auth.sign_in_with_password({
-                    "email": email,
-                    "password": password
-                })
-                if res.user:
-                    st.session_state.user = res.user
-                    st.session_state.token = res.session.access_token
-                    st.rerun()
-                else:
-                    st.error("Invalid credentials")
-            else:
-                st.error("Supabase not configured")
-
-# ------------------------------------------------
-# TOP NAVBAR
-# ------------------------------------------------
+# ---------------- TOPBAR ----------------
 st.markdown("""
-<div class="top-navbar">
-    <strong>Django Administration</strong>
+<div class="topbar">
+    <span style="font-size:18px;">☰</span>
+    <span style="float:right;">Logout</span>
 </div>
 """, unsafe_allow_html=True)
-
-st.write("Use sidebar to navigate.")
