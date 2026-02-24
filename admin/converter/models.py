@@ -4,7 +4,6 @@ from datetime import timedelta
 from django.utils import timezone
 import random
 
-
 class Plan(models.Model):
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=8, decimal_places=2)
@@ -12,14 +11,11 @@ class Plan(models.Model):
     credit_limit = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.name
-
+        return self.name or "Unnamed Plan"
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     plan = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True, blank=True)
-
-    # NEW FIELDS
     full_name = models.CharField(max_length=200)
     company = models.CharField(max_length=200, blank=True, null=True)
     phone = models.CharField(max_length=15)
@@ -27,10 +23,8 @@ class UserProfile(models.Model):
     pin_code = models.CharField(max_length=10)
     district = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
-
     email_verified = models.BooleanField(default=False)
     email_otp = models.CharField(max_length=6, blank=True, null=True)
-
     user_credits = models.IntegerField(default=0)
     expiry_date = models.DateField(null=True, blank=True)
 
@@ -45,4 +39,5 @@ class UserProfile(models.Model):
         self.save()
 
     def __str__(self):
-        return self.user.username
+        # Safe string representation to prevent Admin 500 errors
+        return self.user.username if self.user else f"Profile {self.id}"
