@@ -4,12 +4,12 @@ from supabase import create_client
 
 # =============================
 # CONFIG
-# =============================
-SUPABASE_URL = "SUPABASE_URL"
-SUPABASE_KEY = "SUPABASE_KEY"
-DJANGO_API = "https://your-django-domain.com/api/convert/"
+import streamlit as st
+from supabase import create_client
 
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 st.set_page_config(page_title="Accounting Expert", layout="wide")
 
