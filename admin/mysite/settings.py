@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # Use the Config class to ensure signals are loaded
+    # Ensure this points to the Config class to load signals
     'converter.apps.ConverterConfig', 
 ]
 
@@ -75,7 +75,7 @@ if DATABASE_URL:
         "default": dj_database_url.config(
             default=DATABASE_URL,
             conn_max_age=600,
-            # Added health checks to prevent 502/Bad Gateway errors
+            # CRITICAL: Prevents 502 Bad Gateway timeouts on Render/Supabase
             conn_health_checks=True, 
             ssl_require=True
         )
@@ -114,13 +114,27 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_USER')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASSWORD')
+EMAIL_HOST_USER = "yourgmail@gmail.com"
+EMAIL_HOST_PASSWORD = "your-app-password"
 
-# Jazzmin settings to avoid admin crashes
+# Jazzmin settings to stabilize Admin interface
 JAZZMIN_SETTINGS = {
     "site_title": "Accounting Expert",
     "site_header": "Accounting Expert",
     "welcome_sign": "Welcome to Accounting Expert",
     "user_avatar": None,
 }
+
+# =========================
+# 7. SELF-HEALING: AUTO-FIX MISSING PROFILES
+# =========================
+# This block runs on server startup to ensure existing users have profiles
+import django
+django.setup()
+from django.contrib.auth.models import User
+try:
+    from converter.models import UserProfile
+    for user in User.objects.all():
+        UserProfile.objects.get_or_create(user=user)
+except Exception:
+    pass # Prevent build failure if migrations aren't finished
