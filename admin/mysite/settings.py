@@ -16,13 +16,17 @@ DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     "accountingexpert.onrender.com",
+    "new-lsyp.onrender.com",
+    "www.accounting-expert.cloud-ip.cc",
     "127.0.0.1",
     "localhost",
+]
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://accountingexpert.onrender.com",
     "https://newtool.streamlit.app",
+    "www.accounting-expert.cloud-ip.cc",
 ]
 
 # =========================
