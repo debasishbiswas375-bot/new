@@ -26,7 +26,7 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
     "https://accountingexpert.onrender.com",
     "https://newtool.streamlit.app",
-    "www.accounting-expert.cloud-ip.cc",
+    "https://www.accounting-expert.cloud-ip.cc",
 ]
 
 # =========================
