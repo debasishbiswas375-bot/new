@@ -84,8 +84,6 @@ DATABASES = {
         ssl_require=not DEBUG,
     )
 }
-    )
-}
 
 # =========================
 # 5. STATIC FILES (Render)
