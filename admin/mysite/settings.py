@@ -22,10 +22,9 @@ ALLOWED_HOSTS = [
     "localhost",
 ]
 
-
 CSRF_TRUSTED_ORIGINS = [
     "https://accountingexpert.onrender.com",
-    "https://newtool.streamlit.app",
+    "https://new-lsyp.onrender.com",
     "https://www.accounting-expert.cloud-ip.cc",
 ]
 
@@ -63,8 +62,8 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],  # optional root templates
-        "APP_DIRS": True,  # IMPORTANT for converter/templates
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -77,27 +76,25 @@ TEMPLATES = [
 ]
 
 # =========================
-# 4. DATABASE CONFIG (Render / Supabase)
+# 4. DATABASE (Supabase Session Pooler)
 # =========================
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=not DEBUG,
+        conn_max_age=0,          # IMPORTANT for pooled connections
+        ssl_require=True,
     )
 }
 
 # =========================
-# 5. STATIC FILES (Render)
+# 5. STATIC FILES
 # =========================
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # =========================
-# 6. LOGIN / LOGOUT SETTINGS
+# 6. LOGIN / LOGOUT
 # =========================
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -139,6 +136,6 @@ JAZZMIN_SETTINGS = {
     "welcome_sign": "Welcome to Accounting Expert",
     "user_avatar": None,
     "topmenu_links": [
-    {"name": "Logout", "url": "/admin/logout/", "new_window": False},
-],
+        {"name": "Logout", "url": "/admin/logout/", "new_window": False},
+    ],
 }
